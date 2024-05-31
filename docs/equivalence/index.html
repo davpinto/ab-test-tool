@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/B Test Equivalence Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        input, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input[type="number"] {
+            text-align: right;
+        }
+        button {
+            background-color: #5c67f2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: auto;
+            display: block;
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        button:hover {
+            background-color: #4a54e1;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e2e2e2;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 16px;
+            color: #808080;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            background-image: linear-gradient(to right, #ccc, #333, #ccc);
+        }
+        .explanation {
+            margin-top: 20px;
+        }
+        .full-width {
+            width: 100%;
+            padding-top: 20px;
+        }
+        .margin-input {
+            width: 25%; /* Adjusting width to 25% */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>A/B Test Equivalence Calculator</h1>
+        <table>
+            <tr>
+                <th></th>
+                <th>Successes</th>
+                <th>Trials</th>
+            </tr>
+            <tr>
+                <td>Group A (Control)</td>
+                <td><input type="number" id="successA" placeholder="e.g., 100" value="55"></td>
+                <td><input type="number" id="trialsA" placeholder="e.g., 1000" value="1000"></td>
+            </tr>
+            <tr>
+                <td>Group B (Treatment)</td>
+                <td><input type="number" id="successB" placeholder="e.g., 100" value="60"></td>
+                <td><input type="number" id="trialsB" placeholder="e.g., 1000" value="1000"></td>
+            </tr>
+            <tr class="full-width">
+                <td colspan="3"><hr></td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <label for="margin">Equivalence Margin (%):</label>
+                    <input type="number" class="margin-input" id="margin" placeholder="e.g., 5" value="5">
+                </td>
+            </tr>
+        </table>
+        <button onclick="calculateEquivalence()">Calculate Equivalence</button>
+        <div class="result" id="result">Result will appear here...</div>
+        <hr>
+        <div class="explanation">
+            <h2>Statistical Basis</h2>
+            <p>The A/B Test Equivalence Calculator uses statistical hypothesis testing to determine if two groups are statistically equivalent within a predefined margin or if one is significantly better than the other. An equivalence margin of 5% is commonly used as it represents a small yet practically significant difference that can influence decision-making in contexts like marketing and website optimization.</p>
+            <p><strong>Methodology:</strong> It calculates the proportions of successes for both groups, determines the standard error of the difference, and uses a Z-score to calculate the confidence interval. If both the lower and upper bounds of the confidence interval are within the negative and positive bounds of the equivalence margin, the groups are concluded to be equivalent. Otherwise, it checks if the results are significantly different or if the test has not yet converged based on sample size and observed differences.</p>
+            <p>This approach is valuable in scenarios where confirming similarity in results between two different strategies or treatments is as important as identifying superior ones.</p>
+        </div>
+    </div>
+
+    <script>
+        function calculateEquivalence() {
+            const successA = document.getElementById('successA').value;
+            const trialsA = document.getElementById('trialsA').value;
+            const successB = document.getElementById('successB').value;
+            const trialsB = document.getElementById('trialsB').value;
+            const margin = document.getElementById('margin').value / 100;
+
+            const pA = successA / trialsA;
+            const pB = successB / trialsB;
+            const se = Math.sqrt((pA * (1 - pA) / trialsA) + (pB * (1 - pB) / trialsB));
+            const z = 1.96; // Z-score for 95% CI
+
+            const diff = pA - pB;
+            const lowerBound = diff - z * se;
+            const upperBound = diff + z * se;
+
+            const resultElement = document.getElementById('result');
+            if (Math.abs(diff) < se * z) {
+                if (lowerBound > -margin && upperBound < margin) {
+                    resultElement.textContent = 'Converged: A and B are equivalent';
+                    resultElement.style.color = '#0000ff'; // Blue for equivalence
+                } else {
+                    resultElement.textContent = 'Converged: A and B are not equivalent';
+                    resultElement.style.color = '#ff0000'; // Red for difference
+                }
+            } else {
+                resultElement.textContent = 'Not converged yet';
+                resultElement.style.color = '#000000'; // Black for not converged
+            }
+        }
+    </script>
+</body>
+</html>
