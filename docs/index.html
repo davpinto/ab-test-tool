@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/B Test Equivalence Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px; /* Added more vertical space above each label */
+        }
+        input, button {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px; /* Space after each input or button */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #5c67f2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px; /* More space above the button for clarity */
+        }
+        button:hover {
+            background-color: #4a54e1;
+        }
+        .result {
+            margin-top: 20px; /* More space above the result area */
+            padding: 10px;
+            background-color: #e2e2e2;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>A/B Test Equivalence Calculator</h1>
+        <div>
+            <label for="successA">Group A Successes:</label>
+            <input type="number" id="successA" placeholder="e.g., 50">
+            <label for="trialsA">Group A Trials:</label>
+            <input type="number" id="trialsA" placeholder="e.g., 1000">
+            <label for="successB">Group B Successes:</label>
+            <input type="number" id="successB" placeholder="e.g., 50">
+            <label for="trialsB">Group B Trials:</label>
+            <input type="number" id="trialsB" placeholder="e.g., 1000">
+            <label for="margin">Equivalence Margin (%):</label>
+            <input type="number" id="margin" placeholder="e.g., 5">
+            <button onclick="calculateEquivalence()">Calculate Equivalence</button>
+        </div>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculateEquivalence() {
+            const successA = document.getElementById('successA').value;
+            const trialsA = document.getElementById('trialsA').value;
+            const successB = document.getElementById('successB').value;
+            const trialsB = document.getElementById('trialsB').value;
+            const margin = document.getElementById('margin').value / 100;
+
+            const pA = successA / trialsA;
+            const pB = successB / trialsB;
+            const se = Math.sqrt(pA * (1 - pA) / trialsA + pB * (1 - pB) / trialsB);
+            const z = 1.96; // Z-score for 95% CI
+
+            const diff = pA - pB;
+            const lowerBound = diff - z * se;
+            const upperBound = diff + z * se;
+
+            let result = 'Not converged yet';
+            if (Math.abs(diff) < se) {
+                result = (lowerBound > -margin && upperBound < margin) ? 'Converged: A and B are equivalent' : 'Converged: A and B are not equivalent';
+            }
+
+            document.getElementById('result').innerText = result;
+        }
+    </script>
+</body>
+</html>
